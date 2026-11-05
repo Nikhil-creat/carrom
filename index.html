@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.groq.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#070b14"><meta name="description" content="CARROM-X: AI carrom with an agentic planner, RAG coach and CNN-style heatmap by Nikhil Chary Sriramoju.">
+<title>CARROM-X | Agentic AI Carrom</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><a class="logo" href="#top">CARROM<span>-X</span></a><nav><a href="#play">Play</a><a href="#features">Features</a><a href="#arch">Architecture</a><a href="#about">About</a></nav></header>
+<section class="hero" id="top"><h2>Carrom, played against an <em>agent</em> that thinks.</h2><p>Physics engine · simulation-based agentic planner · RAG coach · CNN-style heatmap · serverless backend</p><a class="cta" href="#play">▶ Play now</a></section>
+<main id="play"><section><canvas id="c" width="640" height="640" aria-label="Carrom board"></canvas>
+<div class="row"><label>Striker <input id="sl" type="range" min="70" max="570" value="320"></label></div>
+<div class="row"><button id="hint">🎯 AI Hint</button><button id="heat">🧠 CNN Map</button><button id="new">♻ New Game</button>
+<select id="lvl" aria-label="Agent level"><option value="easy">Agent: Easy</option><option value="pro" selected>Agent: Pro</option><option value="master">Agent: Master</option></select></div></section>
+<aside><div class="card score"><div>You (White) <b id="sw">0</b></div><div>Agent (Black) <b id="sb">0</b></div></div>
+<div id="st" class="card">Your turn</div><div class="card" id="stats"></div>
+<div class="card"><h3>🤖 Agent Log</h3><div id="log"></div></div>
+<div class="card"><h3>📚 RAG Coach</h3><input id="q" maxlength="200" placeholder="Ask: how do I pot the queen?"><button id="ask">Ask</button>
+<input id="key" type="password" maxlength="100" placeholder="Optional own Groq key (session only)"><div id="ans"></div></div></aside></main>
+<section id="features" class="wrap"><h2>Features</h2><div class="grid">
+<div class="card"><h3>🧠 Agentic planner</h3>Observe → simulate 200+ shots → score → act, with 3 skill levels.</div>
+<div class="card"><h3>📚 RAG coach</h3>TF-IDF retrieval over a carrom knowledge base, LLM answers via serverless API.</div>
+<div class="card"><h3>👁 CNN-style map</h3>Two Gaussian convolution layers over a 32×32 occupancy grid.</div>
+<div class="card"><h3>⚙ Serverless backend</h3>/api/coach (rate-limited Groq proxy) and /api/health on Vercel.</div>
+<div class="card"><h3>🔒 Security</h3>Strict CSP, no inline JS, server-side keys, input validation, hardened Docker.</div>
+<div class="card"><h3>📱 PWA</h3>Installable, offline-capable shell, stats saved locally, sound effects.</div></div></section>
+<section id="arch" class="wrap"><h2>Architecture</h2><div class="card"><code>Browser (Canvas + physics + planner + RAG + conv map) → /api/coach (Vercel function, rate limit, validation) → Groq LLM</code><br><br>CI: GitHub Actions builds the Docker image · Runtime: nginx-unprivileged, read-only FS, caps dropped.</div></section>
+<section id="about" class="wrap"><h2>About the builder</h2><div class="card cred"><h3>👨‍💻 Nikhil Chary Sriramoju</h3><p>B.Tech CSE · Vaagdevi College of Engineering (2023–2027)</p>
+<p>ML Engineer Intern @ Yuva Intern (NSDC) · Data Analytics Intern @ Thiranex</p><p>NASSCOM AI-Data Engineering &amp; Cloud · IBM SkillsBuild AI Fundamentals · Reliance Foundation AI/ML Engineer</p>
+<a href="https://github.com/Nikhil-creat" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a" target="_blank" rel="noopener noreferrer">LinkedIn</a></div></section>
+<footer><p>© 2026 CARROM-X · Built by Nikhil Chary Sriramoju · Thorrur, Telangana, India</p><p>API: <b id="api">checking…</b> · <a href="#top">Back to top ↑</a></p></footer>
+<script src="app.js"></script></body></html>

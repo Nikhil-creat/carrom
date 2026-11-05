@@ -1,0 +1,18 @@
+*{box-sizing:border-box}body{margin:0;background:#070b14;color:#e6f1ff;font-family:system-ui,sans-serif}
+header{text-align:center;padding:14px}h1{margin:0;letter-spacing:6px;font-size:2rem}h1 span{color:#00ffc8}header p{margin:4px;color:#7fa;font-size:.8rem}
+main{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:10px}section{width:min(94vw,640px)}
+canvas{width:100%;height:auto;touch-action:none;border-radius:14px;box-shadow:0 0 40px #00ffc855}
+.row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.row label{flex:1;display:flex;gap:8px}.row input{flex:1}
+aside{width:min(94vw,340px);display:flex;flex-direction:column;gap:10px}
+.card{background:#0e1626;border:1px solid #1d3a5c;border-radius:12px;padding:10px;font-size:.85rem}.card h3{margin:0 0 6px;font-size:.9rem;color:#00ffc8}
+.score{display:flex;justify-content:space-around}.score b{display:block;font-size:1.6rem;text-align:center}
+button{background:#00ffc8;color:#041;border:0;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
+input{width:100%;margin:4px 0;padding:7px;border-radius:8px;border:1px solid #1d3a5c;background:#070b14;color:#e6f1ff}
+#log,#ans{max-height:130px;overflow:auto;color:#9bd;white-space:pre-wrap}.cred a{color:#00ffc8}
+html{scroll-behavior:smooth}.top{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;position:sticky;top:0;background:#070bd9cc;background:rgba(7,11,20,.92);backdrop-filter:blur(8px);z-index:5;flex-wrap:wrap}
+.logo{color:#e6f1ff;font-weight:800;letter-spacing:4px;text-decoration:none}.logo span{color:#00ffc8}nav a{color:#9bd;margin-left:14px;text-decoration:none}nav a:hover{color:#00ffc8}
+.hero{text-align:center;padding:40px 14px 10px}.hero h2{font-size:clamp(1.5rem,5vw,2.6rem);margin:0}.hero em{color:#00ffc8;font-style:normal}.hero p{color:#7fa}
+.cta{display:inline-block;background:#00ffc8;color:#041;padding:10px 22px;border-radius:30px;font-weight:800;text-decoration:none}
+.wrap{max-width:1000px;margin:30px auto;padding:0 14px}.wrap h2{color:#00ffc8}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+select{padding:8px;border-radius:8px;background:#0e1626;color:#e6f1ff;border:1px solid #1d3a5c}code{color:#9bd;word-break:break-word}
+footer{text-align:center;padding:24px;margin-top:30px;border-top:1px solid #1d3a5c;color:#7fa;font-size:.85rem}footer a{color:#00ffc8}
