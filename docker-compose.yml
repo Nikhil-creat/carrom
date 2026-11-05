@@ -2,6 +2,7 @@ services:
   carrom:
     build: .
     ports: ["8080:8080"]
+    environment: [GROQ_API_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN]
     read_only: true
     tmpfs: ["/tmp"]
     security_opt: ["no-new-privileges:true"]

@@ -4,12 +4,20 @@
 <title>CARROM-X | Agentic AI Carrom</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="stylesheet" href="style.css"></head><body>
 <header class="top"><a class="logo" href="#top">CARROM<span>-X</span></a><nav><a href="#play">Play</a><a href="#features">Features</a><a href="#arch">Architecture</a><a href="#about">About</a></nav></header>
 <section class="hero" id="top"><h2>Carrom, played against an <em>agent</em> that thinks.</h2><p>Physics engine · simulation-based agentic planner · RAG coach · CNN-style heatmap · serverless backend</p><a class="cta" href="#play">▶ Play now</a></section>
-<main id="play"><section><canvas id="c" width="640" height="640" aria-label="Carrom board"></canvas>
+<main id="play"><section><div class="hud"><span id="tm">⏱ 30s</span><span id="trn">White to play</span><span id="gc">00:00</span></div><div id="bar"><i id="bi"></i></div><canvas id="c" width="640" height="640" aria-label="Carrom board"></canvas>
 <div class="row"><label>Striker <input id="sl" type="range" min="70" max="570" value="320"></label></div>
 <div class="row"><button id="hint">🎯 AI Hint</button><button id="heat">🧠 CNN Map</button><button id="new">♻ New Game</button>
-<select id="lvl" aria-label="Agent level"><option value="easy">Agent: Easy</option><option value="pro" selected>Agent: Pro</option><option value="master">Agent: Master</option></select></div></section>
+<select id="lvl" aria-label="Agent level"><option value="auto">Agent: Adaptive</option><option value="easy">Agent: Easy</option><option value="pro" selected>Agent: Pro</option><option value="master">Agent: Master</option></select>
+<select id="mode" aria-label="Mode"><option value="ai">vs Agent</option><option value="2p">2 Players (local)</option><option value="online">Online room</option></select>
+<select id="red" aria-label="Red mode"><option value="red">Red mode (queen)</option><option value="nored">Non-red (no queen)</option></select>
+<select id="theme" aria-label="Board"><option value="classic">Board: Classic</option><option value="neon">Board: Neon</option><option value="marble">Board: Marble</option><option value="midnight">Board: Midnight</option><option value="royal">Board: Royal</option></select>
+<select id="tlim" aria-label="Turn timer"><option value="30">⏱ 30s</option><option value="15">⏱ 15s</option><option value="60">⏱ 60s</option><option value="0">⏱ Off</option></select>
+<button id="eye">👁 Agent Vision</button><button id="mic">🎙 Voice</button><label><input id="snd" type="checkbox" checked> 🔊</label></div></section>
 <aside><div class="card score"><div>You (White) <b id="sw">0</b></div><div>Agent (Black) <b id="sb">0</b></div></div>
 <div id="st" class="card">Your turn</div><div class="card" id="stats"></div>
+<div class="card"><h3>🌐 Online Room</h3><input id="rc" maxlength="5" placeholder="Room code"><div class="row"><button id="rcreate">Create</button><button id="rjoin">Join</button></div><div id="rs">Play a friend on another phone.</div></div>
+<div class="card"><h3>📈 AI Telemetry</h3><canvas id="sp" width="300" height="60"></canvas><div id="tt"></div></div>
+<div class="card"><h3>🏆 Global Leaderboard</h3><div id="lbl"></div><input id="nm" maxlength="16" placeholder="Your name"><button id="sub">Submit score</button></div>
 <div class="card"><h3>🤖 Agent Log</h3><div id="log"></div></div>
 <div class="card"><h3>📚 RAG Coach</h3><input id="q" maxlength="200" placeholder="Ask: how do I pot the queen?"><button id="ask">Ask</button>
 <input id="key" type="password" maxlength="100" placeholder="Optional own Groq key (session only)"><div id="ans"></div></div></aside></main>
@@ -19,10 +27,15 @@
 <div class="card"><h3>👁 CNN-style map</h3>Two Gaussian convolution layers over a 32×32 occupancy grid.</div>
 <div class="card"><h3>⚙ Serverless backend</h3>/api/coach (rate-limited Groq proxy) and /api/health on Vercel.</div>
 <div class="card"><h3>🔒 Security</h3>Strict CSP, no inline JS, server-side keys, input validation, hardened Docker.</div>
-<div class="card"><h3>📱 PWA</h3>Installable, offline-capable shell, stats saved locally, sound effects.</div></div></section>
+<div class="card"><h3>📱 PWA</h3>Installable, offline-capable shell, stats saved locally, sound effects.</div>
+<div class="card"><h3>🎛 Adaptive agent</h3>Difficulty rises as you win; Agent Vision shows its top 5 candidate shots.</div>
+<div class="card"><h3>🎙 Voice &amp; keys</h3>Say “hint / new / map / vision”, or press H N M V and ←/→.</div>
+<div class="card"><h3>👥 2-player mode</h3>Pass-and-play on one device with AI hints for either side.</div>
+<div class="card"><h3>🏆 Leaderboard</h3>Upstash Redis sorted set behind a validated, rate-limited API.</div></div></section>
 <section id="arch" class="wrap"><h2>Architecture</h2><div class="card"><code>Browser (Canvas + physics + planner + RAG + conv map) → /api/coach (Vercel function, rate limit, validation) → Groq LLM</code><br><br>CI: GitHub Actions builds the Docker image · Runtime: nginx-unprivileged, read-only FS, caps dropped.</div></section>
 <section id="about" class="wrap"><h2>About the builder</h2><div class="card cred"><h3>👨‍💻 Nikhil Chary Sriramoju</h3><p>B.Tech CSE · Vaagdevi College of Engineering (2023–2027)</p>
 <p>ML Engineer Intern @ Yuva Intern (NSDC) · Data Analytics Intern @ Thiranex</p><p>NASSCOM AI-Data Engineering &amp; Cloud · IBM SkillsBuild AI Fundamentals · Reliance Foundation AI/ML Engineer</p>
 <a href="https://github.com/Nikhil-creat" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a" target="_blank" rel="noopener noreferrer">LinkedIn</a></div></section>
-<footer><p>© 2026 CARROM-X · Built by Nikhil Chary Sriramoju · Thorrur, Telangana, India</p><p>API: <b id="api">checking…</b> · <a href="#top">Back to top ↑</a></p></footer>
+<footer><p>© 2026 CARROM-X · Built by Nikhil Chary Sriramoju · Thorrur, Telangana, India</p><p>Keys: H hint · N new · M map · V vision · ←/→ striker</p><p>API: <b id="api">checking…</b> · <a href="#top">Back to top ↑</a></p></footer>
+<canvas id="cf"></canvas><div id="win" hidden><div class="wbox"><h2 id="wt"></h2><div class="row"><button id="again">▶ Play again</button><button id="share">📤 Share</button></div></div></div>
 <script src="app.js"></script></body></html>

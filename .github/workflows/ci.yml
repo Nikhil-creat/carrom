@@ -5,4 +5,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: for f in app.js sw.js server.js api/*.js; do node --check $f; done
       - run: docker build -t carrom-x .

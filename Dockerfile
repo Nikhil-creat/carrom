@@ -1,5 +1,9 @@
-FROM nginxinc/nginx-unprivileged:1.27-alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY index.html style.css app.js sw.js manifest.webmanifest icon.svg /usr/share/nginx/html/
+FROM node:20-alpine
+WORKDIR /app
+COPY server.js vercel.json index.html style.css app.js sw.js manifest.webmanifest icon.svg package.json ./
+COPY api ./api
+USER node
+ENV PORT=8080
 EXPOSE 8080
-HEALTHCHECK CMD wget -qO- http://localhost:8080/ >/dev/null || exit 1
+HEALTHCHECK CMD wget -qO- http://localhost:8080/api/health >/dev/null || exit 1
+CMD ["node","server.js"]
