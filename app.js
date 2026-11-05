@@ -1,8 +1,8 @@
 'use strict';
-const THEMES={classic:{f:'#5a3418',s:'#e8c98a',l:'#7a4a22',c:'#a33',p:'#111',w:'#f8f0d8',b:'#222'},neon:{f:'#0a0f2c',s:'#101a3d',l:'#00ffc8',c:'#ff2bd6',p:'#000',w:'#e0ffff',b:'#7a2cff'},marble:{f:'#2b2b2b',s:'#e9e9ee',l:'#8a8a99',c:'#c33',p:'#222',w:'#fff',b:'#333'},midnight:{f:'#0b1d33',s:'#1c3b5e',l:'#4aa3ff',c:'#4aa3ff',p:'#02060c',w:'#cfe8ff',b:'#0a1220'},royal:{f:'#3b0d0d',s:'#d9b36a',l:'#8a1c1c',c:'#8a1c1c',p:'#1a0505',w:'#fff4d6',b:'#2a1a0a'}};let TH=THEMES.classic;
+const THEMES={classic:{f:'#5a3418',s:'#e8c98a',l:'#7a4a22',c:'#a33',p:'#111',w:'#f8f0d8',b:'#222'},neon:{f:'#0a0f2c',s:'#101a3d',l:'#00ffc8',c:'#ff2bd6',p:'#000',w:'#e0ffff',b:'#7a2cff'},marble:{f:'#2b2b2b',s:'#e9e9ee',l:'#8a8a99',c:'#c33',p:'#222',w:'#fff',b:'#333'},midnight:{f:'#0b1d33',s:'#1c3b5e',l:'#4aa3ff',c:'#4aa3ff',p:'#02060c',w:'#cfe8ff',b:'#0a1220'},royal:{f:'#3b0d0d',s:'#d9b36a',l:'#8a1c1c',c:'#8a1c1c',p:'#1a0505',w:'#fff4d6',b:'#2a1a0a'}};let TH=THEMES.classic;const I={en:{hint:'🎯 AI Hint',heat:'🧠 CNN Map',new:'♻ New Game',eye:'👁 Agent Vision',mic:'🎙 Voice',undo:'↩ Undo',replay:'🎬 Replay',dly:'📅 Daily',again:'▶ Play again',share:'📤 Share',w:'White to play',b:'Black to play',m:'In motion…'},hi:{hint:'🎯 AI संकेत',heat:'🧠 CNN नक्शा',new:'♻ नया खेल',eye:'👁 एजेंट दृष्टि',mic:'🎙 आवाज़',undo:'↩ पूर्ववत',replay:'🎬 रीप्ले',dly:'📅 दैनिक',again:'▶ फिर खेलें',share:'📤 साझा करें',w:'सफ़ेद की बारी',b:'काले की बारी',m:'गति में…'},te:{hint:'🎯 AI సూచన',heat:'🧠 CNN మ్యాప్',new:'♻ కొత్త ఆట',eye:'👁 ఏజెంట్ విజన్',mic:'🎙 వాయిస్',undo:'↩ రద్దు',replay:'🎬 రీప్లే',dly:'📅 రోజువారీ',again:'▶ మళ్ళీ ఆడండి',share:'📤 షేర్',w:'తెలుపు వంతు',b:'నలుపు వంతు',m:'కదులుతోంది…'}};
 const $=id=>document.getElementById(id),C=$('c'),X=C.getContext('2d');
 const S=640,M=34,R=13,SR=16,PR=27,FR=.984,VM=12,P=[[M,M],[S-M,M],[M,S-M],[S-M,S-M]];
-let tl=30,gt=0,sr={w:[0,0],b:[0,0]},online=false,my='w',room='',seq=0,poll=null,vision=null,visionY=0,eye=false,tele={sims:0,shots:0,pots:0},hist=[0],W=[],pots=[],scores={w:0,b:0},turn='w',busy=false,over=false,heat=false,aim=null,hint=null,sxp=320,cur='w';
+let rec=[],rp=[],replaying=false,snaps=[],series={w:0,b:0},daily=false,lang='en',tl=30,gt=0,sr={w:[0,0],b:[0,0]},online=false,my='w',room='',seq=0,poll=null,vision=null,visionY=0,eye=false,tele={sims:0,shots:0,pots:0},hist=[0],W=[],pots=[],scores={w:0,b:0},turn='w',busy=false,over=false,heat=false,aim=null,hint=null,sxp=320,cur='w';
 const mk=(x,y,t)=>({x:+x.toFixed(3),y:+y.toFixed(3),vx:0,vy:0,t,r:t==='s'?SR:R,m:t==='s'?2:1,out:0});
 const log=t=>{const l=$('log');l.textContent=t+'\n'+l.textContent.slice(0,900)};
 /* ---------- physics ---------- */
@@ -26,28 +26,28 @@ function simulate(side,sx,y,vx,vy){const w=W.map(b=>({...b})),s=w[0];s.x=sx;s.y=
  for(let i=0;i<700&&(i===0||moving(w));i++)step(w,pl);return resolve(side,pl)}
 function plan(side){const y=side==='w'?S-M-48:M+48,dir=side==='w'?-1:1;let best=null,n=0;const cs=[];
  const tg=W.filter(b=>!b.out&&b.t!=='s'&&(b.t===side||b.t==='q'));
- const tryS=(sx,dx,dy,pw)=>{const d=Math.hypot(dx,dy)||1,vx=dx/d*pw*VM,vy=dy/d*pw*VM,r=simulate(side,sx,y,vx,vy);
-  const v=r.own*10+r.q*14-r.opp*10-r.f*15+Math.random()*.5;n++;cs.push({sx,vx,vy,v});if(!best||v>best.v)best={sx,vx,vy,v,r}};
+ const run=(sx,vx,vy)=>{const r=simulate(side,sx,y,vx,vy),v=r.own*10+r.q*14-r.opp*10-r.f*15+Math.random()*.5;n++;cs.push({sx,vx,vy,v});if(!best||v>best.v)best={sx,vx,vy,v,r}},cl=[];
+ const tryS=(sx,dx,dy,pw)=>{const d=Math.hypot(dx,dy)||1,vx=dx/d*pw*VM,vy=dy/d*pw*VM;if(window.ML&&ML.ready)cl.push({sx,vx,vy,p:ML.predict(ML.feat(W,side,sx,vx,vy))});else run(sx,vx,vy)};
  for(const c of tg)for(const p of P){const ux=p[0]-c.x,uy=p[1]-c.y,l=Math.hypot(ux,uy)||1,gx=c.x-ux/l*(R+SR),gy=c.y-uy/l*(R+SR);
   for(const sx of[130,320,510])for(const pw of[.6,1])tryS(sx,gx-sx,gy-y,pw)}
  for(let i=0;i<20;i++)tryS(90+Math.random()*460,Math.random()*400-200,dir*(50+Math.random()*300),.5+Math.random()*.5);
- vision=cs.sort((a,b)=>b.v-a.v).slice(0,5);visionY=y;tele.sims+=n;return{best,n}}
+ cl.sort((a,b)=>b.p-a.p).slice(0,90).forEach(c=>run(c.sx,c.vx,c.vy));vision=cs.sort((a,b)=>b.v-a.v).slice(0,5);visionY=y;tele.sims+=n;return{best,n}}
 /* ---------- game flow ---------- */
 function place(side){const s=W[0];s.out=0;s.vx=s.vy=0;s.x=side==='w'||$('mode').value!=='ai'?sxp:S/2;s.y=side==='w'?S-M-48:M+48}
 function reset(){W=[mk(S/2,S-M-48,'s')];if($('red').value==='red')W.push(mk(S/2,S/2,'q'));const c=S/2;
  for(let i=0;i<6;i++){const a=i*Math.PI/3;W.push(mk(c+Math.cos(a)*2.1*R,c+Math.sin(a)*2.1*R,i%2?'w':'b'))}
  for(let i=0;i<12;i++){const a=i*Math.PI/6+.26;W.push(mk(c+Math.cos(a)*4.2*R,c+Math.sin(a)*4.2*R,i%2?'b':'w'))}
- scores={w:0,b:0};turn='w';busy=false;over=false;hint=null;hist=[0];tele.shots=tele.pots=0;sr={w:[0,0],b:[0,0]};gt=0;place('w');tl=+$('tlim').value;log('New game. Drag the striker backwards and release.');ui();draw()}
+ scores={w:0,b:0};turn='w';busy=false;over=false;hint=null;hist=[0];tele.shots=tele.pots=0;sr={w:[0,0],b:[0,0]};gt=0;rec=[];snaps=[];replaying=false;place('w');tl=+$('tlim').value;if(daily)dailyBoard();log('New game. Drag the striker backwards and release.');ui();draw()}
 function ui(){$('sw').textContent=scores.w;$('sb').textContent=scores.b;
  if(!over)$('st').textContent=busy?(cur==='b'?'🤖 Agent is playing…':'Coins in motion…'):turn==='w'?'Your turn — pull back the striker':'Agent turn'}
-function shoot(side,sx,y,vx,vy){beep(200,.08);const s=W[0];s.x=sx;s.y=y;s.vx=vx;s.vy=vy;s.out=0;pots=[];busy=true;cur=side;hint=null;ui();requestAnimationFrame(loop)}
+function shoot(side,sx,y,vx,vy){beep(200,.08);if(!replaying)rec.push([side,sx,y,vx,vy]);const s=W[0];s.x=sx;s.y=y;s.vx=vx;s.vy=vy;s.out=0;pots=[];busy=true;cur=side;hint=null;ui();requestAnimationFrame(loop)}
 function loop(){for(let i=0;i<2;i++)step(W,pots);draw();if(moving(W))return requestAnimationFrame(loop);end()}
 function end(){busy=false;const r=resolve(cur,pots),o=cur==='w'?'b':'w';const qb=pots.find(b=>b.t==='q');if(qb&&!r.q){qb.out=0;qb.x=qb.y=S/2;qb.vx=qb.vy=0;log('👑 Queen not covered — returned to centre')}
- scores[cur]+=r.own+r.q*3-r.f;scores[o]+=r.opp;if(r.own||r.q){beep(660,.15);navigator.vibrate&&navigator.vibrate(30)}hist.push(scores.w-scores.b);sr[cur][0]++;sr[cur][1]+=(r.own||r.q)?1:0;tele.shots++;tele.pots+=r.own+r.q;drawTele();
+ scores[cur]+=r.own+r.q*3-r.f;scores[o]+=r.opp;if(r.f){const pb=pots.find(b=>b.t===cur);if(pb){pb.out=0;pb.x=S/2;pb.y=S/2+34;pb.vx=pb.vy=0;scores[cur]--}tele.fouls=(tele.fouls|0)+1}if(r.own||r.q){beep(660,.15);navigator.vibrate&&navigator.vibrate(30)}commentate(cur,r);hist.push(scores.w-scores.b);sr[cur][0]++;sr[cur][1]+=(r.own||r.q)?1:0;tele.shots++;tele.pots+=r.own+r.q;drawTele();
  log(`${cur==='w'?'You':'Agent'}: own ${r.own}, opp ${r.opp}${r.q?', QUEEN +3':''}${r.f?', FOUL -1':''}`);
  const left=t=>W.filter(b=>b.t===t&&!b.out).length;
- if(!left('w')||!left('b')){over=true;saveStats();{const wn=scores.w>scores.b,dr=scores.w===scores.b,m=$('mode').value,msg=dr?'Draw!':m==='ai'?(wn?'🏆 You win!':'🤖 Agent wins'):(wn?'🏆 White wins!':'🏆 Black wins!'),won=m==='online'?(my==='w'?wn:!wn):m==='ai'?wn:true;$('st').textContent=msg;celebrate(!dr&&won,msg+` (${scores.w}–${scores.b})`)}draw();return ui2()}
- turn=(r.own||r.q)&&!r.f?cur:o;place(turn);tl=+$('tlim').value;ui();draw();if(turn==='b'&&$('mode').value==='ai')aiMove()}
+ if(!left('w')||!left('b')){over=true;saveStats();{const wn=scores.w>scores.b,dr=scores.w===scores.b,m=$('mode').value,msg=dr?'Draw!':m==='ai'?(wn?'🏆 You win!':'🤖 Agent wins'):(wn?'🏆 White wins!':'🏆 Black wins!'),won=m==='online'?(my==='w'?wn:!wn):m==='ai'?wn:true;$('st').textContent=msg;celebrate(!dr&&won,msg+` (${scores.w}–${scores.b})`+matchUpdate(wn,dr))}draw();return ui2()}
+ turn=(r.own||r.q)&&!r.f?cur:o;place(turn);tl=+$('tlim').value;ui();draw();if(replaying)return void setTimeout(nextRp,600);if(turn==='b'&&$('mode').value==='ai')aiMove()}
 const ui2=()=>{$('sw').textContent=scores.w;$('sb').textContent=scores.b};
 function aiMove(){busy=true;cur='b';ui();setTimeout(()=>{const{best,n}=plan('b');log(`🤖 Simulated ${n} shots, best EV ${best.v.toFixed(1)}`);const q=(Math.random()-.5)*nzv(),cs=Math.cos(q),sn=Math.sin(q);shoot('b',best.sx,M+48,best.vx*cs-best.vy*sn,best.vx*sn+best.vy*cs)},60)}
 /* ---------- CNN-style conv map (2 Gaussian conv layers over coin occupancy grid) ---------- */
@@ -101,9 +101,9 @@ reset();
 const NZ={easy:.3,pro:.1,master:0};
 function beep(f,d){try{if(!$('snd').checked)return;const a=beep.c||(beep.c=new AudioContext()),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d)}catch{}}
 const getStats=()=>{try{return JSON.parse(localStorage.getItem('cx'))||{g:0,w:0,best:0}}catch{return{g:0,w:0,best:0}}};
-function showStats(){const t=getStats();$('stats').textContent=`📊 Games ${t.g} · Wins ${t.w} · Best score ${t.best}`}
-function saveStats(){if($('mode').value!=='ai')return;const t=getStats();t.g++;if(scores.w>scores.b)t.w++;t.best=Math.max(t.best,scores.w);try{localStorage.setItem('cx',JSON.stringify(t))}catch{}showStats()}
-$('ask').onclick=async()=>{const q=$('q').value.trim().slice(0,200),a=$('ans'),key=$('key').value.trim();if(!q)return;const ctx=retrieve(q,3);a.textContent='…';
+function showStats(){const t=getStats();$('stats').textContent=`📊 Games ${t.g} · Wins ${t.w} · Best score ${t.best} · Rating ${t.elo||1000}`}
+function saveStats(){if($('mode').value!=='ai')return;const t=getStats();t.g++;{const R0={easy:900,pro:1200,master:1500,auto:1200}[$('lvl').value],e=t.elo||1000,res=scores.w>scores.b?1:scores.w===scores.b?.5:0;t.elo=Math.round(e+24*(res-1/(1+10**((R0-e)/400))))}if(scores.w>scores.b)t.w++;t.best=Math.max(t.best,scores.w);try{localStorage.setItem('cx',JSON.stringify(t))}catch{}showStats()}
+$('ask').onclick=async()=>{const q=$('q').value.trim().slice(0,200),a=$('ans'),key=$('key').value.trim();if(!q)return;const ctx=retrieve(q,2).concat([`PLAYER STATS: strike rate ${rate('w')}%, shots ${sr.w[0]}, fouls ${tele.fouls|0}, level ${$('lvl').value}. ${rate('w')<30?'Tip: use the yellow aim line and lower power near pockets.':'Keep pressure with covered queen shots.'}`]);a.textContent='…';
  try{const r=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,ctx,score:`you ${scores.w}, agent ${scores.b}`})});
   if(r.ok){a.textContent=(await r.json()).answer;return}}catch{}
  if(key){sessionStorage.setItem('gk',key);try{const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:300,messages:[{role:'system',content:'Concise carrom coach. CONTEXT:\n'+ctx.join('\n')},{role:'user',content:q}]})});
@@ -134,25 +134,42 @@ const rate=s=>sr[s][0]?Math.round(sr[s][1]/sr[s][0]*100):0;
 function rayHit(s,ux,uy){let best=null;const rr=(SR+R)**2;for(const c of W){if(c.out||c.t==='s')continue;const fx=c.x-s.x,fy=c.y-s.y,pr=fx*ux+fy*uy;if(pr<0)continue;const p2=fx*fx+fy*fy-pr*pr;if(p2>rr)continue;
  const t=pr-Math.sqrt(rr-p2);if(!best||t<best.t){const gx=s.x+ux*t,gy=s.y+uy*t,nx=c.x-gx,ny=c.y-gy,nl=Math.sqrt(nx*nx+ny*ny)||1;best={t,gx,gy,c,nx:nx/nl,ny:ny/nl}}}return best}
 function hud(){const lim=+$('tlim').value;$('tm').textContent=lim?`⏱ ${Math.max(0,tl)}s`:'⏱ ∞';$('gc').textContent=String(gt/60|0).padStart(2,'0')+':'+String(gt%60).padStart(2,'0');
- $('trn').textContent=busy?'In motion…':turn==='w'?'White to play':'Black to play';$('bi').style.width=(lim?Math.max(0,tl)/lim*100:100)+'%'}
+ $('trn').textContent=busy?I[lang].m:(turn==='w'?I[lang].w:I[lang].b)+($('mode').value==='4p'?` · P${sr[turn][0]%2+1}`:'');$('bi').style.width=(lim?Math.max(0,tl)/lim*100:100)+'%'}
 function passTurn(){turn=turn==='w'?'b':'w';place(turn);tl=+$('tlim').value;log('⏱ Turn passed');ui();draw();hud();if(turn==='b'&&$('mode').value==='ai')aiMove()}
-setInterval(()=>{if(over)return;gt++;const ai=turn==='b'&&$('mode').value==='ai',lim=+$('tlim').value;
+setInterval(()=>{if(over||replaying)return;gt++;const ai=turn==='b'&&$('mode').value==='ai',lim=+$('tlim').value;
  if(!busy&&!ai&&lim){tl--;if(tl<=0&&(!online||turn===my)){if(online)api({a:'move',code:room,side:turn,pass:true}).catch(()=>{});passTurn()}}hud()},1000);
 function confetti(){const c=$('cf'),g=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const ps=Array.from({length:150},()=>({x:Math.random()*c.width,y:-20-Math.random()*300,vx:Math.random()*4-2,vy:2+Math.random()*4,r:3+Math.random()*4,c:`hsl(${Math.random()*360},90%,60%)`}));let f=0;
  (function a(){g.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;g.fillStyle=p.c;g.fillRect(p.x,p.y,p.r,p.r*1.6)});if(++f<280)requestAnimationFrame(a);else g.clearRect(0,0,c.width,c.height)})()}
 function celebrate(win,msg){$('wt').textContent=msg;$('win').className=win?'up':'lose';$('win').hidden=false;if(win){confetti();[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18),i*140))}}
 $('again').onclick=()=>{$('win').hidden=true;reset()};
 $('share').onclick=()=>{const t=`I played CARROM-X (${scores.w}–${scores.b})! ${location.origin}`;navigator.share?navigator.share({text:t}).catch(()=>{}):navigator.clipboard&&navigator.clipboard.writeText(t)};
-$('new').onclick=()=>{$('win').hidden=true;reset()};$('red').onchange=()=>{$('win').hidden=true;reset()};$('tlim').onchange=()=>{tl=+$('tlim').value;hud()};
+$('new').onclick=()=>{daily=false;$('win').hidden=true;reset()};$('red').onchange=()=>{$('win').hidden=true;reset()};$('tlim').onchange=()=>{tl=+$('tlim').value;hud()};
 $('mode').onchange=()=>{if($('mode').value!=='online'){online=false;clearInterval(poll)}$('win').hidden=true;reset()};
 $('theme').onchange=e=>{TH=THEMES[e.target.value];try{localStorage.setItem('cxt',e.target.value)}catch{}draw()};
 try{const t=localStorage.getItem('cxt');if(THEMES[t]){TH=THEMES[t];$('theme').value=t}}catch{}
 /* online rooms (turn-based, deterministic replay of shots via /api/room) */
 const api=o=>fetch('/api/room',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(r=>r.json());
-function fire(sd,sx,vx,vy){const s=W[0];shoot(sd,sx,s.y,vx,vy);if(online)api({a:'move',code:room,side:sd,sx,vx,vy}).catch(()=>{})}
+function fire(sd,sx,vx,vy){const s=W[0];snaps.push(JSON.stringify({W:W.map(b=>({...b})),scores,turn,hist,sr,rl:rec.length}));shoot(sd,sx,s.y,vx,vy);if(online)api({a:'move',code:room,side:sd,sx,vx,vy}).catch(()=>{})}
 function startOnline(code,side){$('mode').value='online';reset();online=true;my=side;room=code;seq=0;$('rs').textContent=`Room ${code} — you are ${side==='w'?'White':'Black'}. Share the code!`;clearInterval(poll);poll=setInterval(pollRoom,1500)}
 async function pollRoom(){if(busy||over)return;try{const j=await (await fetch(`/api/room?code=${room}&from=${seq}`)).json(),m=(j.moves||[])[0];if(!m)return;
  if(m.side===my){seq++;return}if(turn!==m.side)return;seq++;if(m.pass)passTurn();else shoot(m.side,m.sx,m.side==='w'?S-M-48:M+48,m.vx,m.vy)}catch{}}
 $('rcreate').onclick=async()=>{const j=await api({a:'create'}).catch(()=>({}));j.code?startOnline(j.code,'w'):$('rs').textContent='Online needs Upstash env vars'};
 $('rjoin').onclick=async()=>{const c=$('rc').value.trim().toUpperCase(),j=await api({a:'join',code:c}).catch(()=>({}));j.ok?startOnline(c,'b'):$('rs').textContent='Room not found'};
 reset();hud();
+
+/* ---------- v5: learned model, undo/replay, series, Elo, daily, languages, commentary ---------- */
+const say=a=>a[Math.random()*a.length|0];
+function commentate(side,r){const w=side==='w'?'White':'Black';log(r.f?say([`${w} fouls! A coin returns.`,'Striker in the pocket 😬']):r.q?`👑 ${w} takes the queen!`:r.own>1?say([`Double pot by ${w}!`,'Clean sweep 🔥']):r.own?say([`${w} pots one.`,'Nice shot!']):say([`${w} misses.`,'Safe play.','No luck this time.']))}
+function matchUpdate(wn,dr){if(dr)return'';series[wn?'w':'b']++;const bo=+$('bo').value,need=Math.ceil(bo/2);let x='';
+ if(bo>1&&(series.w>=need||series.b>=need)){x=` · MATCH ${series.w>=need?'WON':'LOST'} ${series.w}–${series.b}`;series={w:0,b:0}}$('ser').textContent=`Series ${series.w}–${series.b} (best of ${bo})`;return x}
+function dailyBoard(){const d=new Date().toISOString().slice(0,10);let h=0;for(const c of d)h=(h*31+c.charCodeAt(0))>>>0;const a=(h%360)*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);
+ for(const b of W){if(b.t==='s')continue;const x=b.x-S/2,y=b.y-S/2;b.x=+(S/2+x*ca-y*sa).toFixed(3);b.y=+(S/2+x*sa+y*ca).toFixed(3)}}
+function nextRp(){const m=rp.shift();if(!m){replaying=false;log('🎬 Replay finished');return}shoot(...m)}
+$('replay').onclick=()=>{if(busy||!rec.length)return;const q=rec.slice();reset();rp=q;replaying=true;log('🎬 Replaying…');nextRp()};
+$('undo').onclick=()=>{if(busy||online||replaying||!snaps.length)return;const o=JSON.parse(snaps.pop());W=o.W;scores=o.scores;turn=o.turn;hist=o.hist;sr=o.sr;rec.length=o.rl;over=false;$('win').hidden=true;place(turn);tl=+$('tlim').value;ui();draw();hud();drawTele();log('↩ Undone')};
+$('dly').onclick=()=>{daily=true;$('win').hidden=true;reset();log('📅 Daily challenge '+new Date().toISOString().slice(0,10))};
+function applyLang(){for(const k of['hint','heat','new','eye','mic','undo','replay','dly','again','share'])$(k).textContent=I[lang][k];hud()}
+$('lang').onchange=e=>{lang=e.target.value;try{localStorage.setItem('cxl',lang)}catch{}applyLang()};
+try{const l=localStorage.getItem('cxl');if(I[l]){lang=l;$('lang').value=l}}catch{}
+applyLang();
+fetch('model.json').then(r=>r.json()).then(m=>{ML.set(m);log('🧬 Learned shot model loaded')}).catch(()=>{});

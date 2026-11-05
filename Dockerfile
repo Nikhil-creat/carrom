@@ -1,6 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY server.js vercel.json index.html style.css app.js sw.js manifest.webmanifest icon.svg package.json ./
+COPY server.js vercel.json index.html style.css app.js sw.js manifest.webmanifest icon.svg ml.js model.json closing.css closing.js package.json ./
 COPY api ./api
 USER node
 ENV PORT=8080

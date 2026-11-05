@@ -1,7 +1,7 @@
 'use strict';
 const http=require('http'),fs=require('fs'),path=require('path');
 const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
-const OK=['index.html','style.css','app.js','sw.js','manifest.webmanifest','icon.svg'];
+const OK=['index.html','style.css','app.js','sw.js','manifest.webmanifest','icon.svg','ml.js','model.json','closing.css','closing.js'];
 const H=JSON.parse(fs.readFileSync(path.join(__dirname,'vercel.json'))).headers[0].headers;
 http.createServer(async(req,res)=>{const u=new URL(req.url,'http://x');H.forEach(h=>res.setHeader(h.key,h.value));
  if(u.pathname.startsWith('/api/')){const f=path.join(__dirname,'api',path.basename(u.pathname)+'.js');

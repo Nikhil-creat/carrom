@@ -6,4 +6,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: for f in app.js sw.js server.js api/*.js; do node --check $f; done
+      - run: node --test tests/*.test.js
       - run: docker build -t carrom-x .
