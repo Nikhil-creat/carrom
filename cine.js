@@ -1,0 +1,5 @@
+(function(){'use strict';const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,els=document.querySelectorAll('#features .card,#arch .card,#about .card,.wrap h2');
+els.forEach(e=>e.classList.add('rv'));const io='IntersectionObserver'in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15}):null;
+els.forEach(e=>io?io.observe(e):e.classList.add('in'));if(rm)return;
+document.querySelectorAll('#features .card').forEach(c=>{c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`perspective(600px) rotateY(${x*14}deg) rotateX(${-y*14}deg) translateZ(6px)`});c.addEventListener('pointerleave',()=>{c.style.transform=''})});
+const sc=document.querySelector('.scene');if(sc)addEventListener('pointermove',e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;sc.style.transform=`rotateX(${62-y*20}deg) rotateZ(${x*30}deg)`})})();

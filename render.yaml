@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: carrom-x-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: https://carrom-lilac.vercel.app
