@@ -34,3 +34,17 @@ canvas#c.shk{animation:shk .25s}@keyframes shk{25%{translate:3px -2px}50%{transl
 .hero h2{background:linear-gradient(90deg,#fff,#00ffc8,#fff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sheen 6s linear infinite}@keyframes sheen{to{background-position:-200% 0}}
 .rv{opacity:0;transform:translateY(30px) scale(.97);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.2,1)}.rv.in{opacity:1;transform:none;transition:opacity .8s,transform .12s}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+/* ---- v9 UI polish ---- */
+.top{position:sticky;top:0;z-index:20;height:56px;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;overflow:hidden;background:#070b14;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:1px solid #1d3a5c;text-align:left}
+.logo{font-size:1.05rem;letter-spacing:3px;white-space:nowrap}.top nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}.top nav::-webkit-scrollbar{display:none}
+.top nav a{margin:0;padding:8px 10px;border-radius:8px;font-size:.85rem;white-space:nowrap}.top nav a:hover,.top nav a:active{background:#12304a;color:#00ffc8}
+#play,#features,#arch,#about{scroll-margin-top:64px}
+.hud{gap:8px;font-size:.85rem;flex-wrap:wrap}#hs{color:#fff;font-size:1.05rem}
+.strike{display:flex;align-items:center;gap:10px;margin:10px 0}.strike label{font-weight:700;color:#9bd}.strike input{flex:1;accent-color:#00ffc8;height:28px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+.actions .ab{min-height:48px;padding:6px 4px;font-size:.78rem;line-height:1.2;text-align:center;background:#12263d;color:#e6f1ff;border:1px solid #1d3a5c;border-radius:12px;font-weight:600}
+.actions .ab:hover,.actions .ab:active{background:#17406a;border-color:#00ffc8}.actions .pri{background:#00ffc8;color:#041;border-color:#00ffc8;font-weight:800}
+.settings{background:rgba(14,22,38,.75);border:1px solid #1d3a5c;border-radius:12px;padding:8px 10px}.settings summary{cursor:pointer;font-weight:700;color:#00ffc8;padding:4px 0}
+.sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}.sgrid select{width:100%;min-height:44px}
+.tgl{display:flex;align-items:center;gap:8px;min-height:44px;background:#0b1424;border:1px solid #1d3a5c;border-radius:10px;padding:0 10px;font-size:.85rem}.tgl input{width:20px;height:20px;margin:0;accent-color:#00ffc8}
+#rs{margin-top:6px;color:#9bd;font-size:.85rem}.card input{margin:6px 0}

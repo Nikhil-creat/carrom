@@ -38,7 +38,7 @@ function reset(){W=[mk(S/2,S-M-48,'s')];if($('red').value==='red')W.push(mk(S/2,
  for(let i=0;i<6;i++){const a=i*Math.PI/3;W.push(mk(c+Math.cos(a)*2.1*R,c+Math.sin(a)*2.1*R,i%2?'w':'b'))}
  for(let i=0;i<12;i++){const a=i*Math.PI/6+.26;W.push(mk(c+Math.cos(a)*4.2*R,c+Math.sin(a)*4.2*R,i%2?'b':'w'))}
  scores={w:0,b:0};turn='w';busy=false;over=false;hint=null;hist=[0];tele.shots=tele.pots=0;sr={w:[0,0],b:[0,0]};gt=0;rec=[];snaps=[];replaying=false;place('w');tl=+$('tlim').value;if(daily)dailyBoard();log('New game. Drag the striker backwards and release.');ui();draw()}
-function ui(){$('sw').textContent=scores.w;$('sb').textContent=scores.b;
+function ui(){$('sw').textContent=scores.w;$('sb').textContent=scores.b;$('hs').textContent=scores.w+' – '+scores.b;
  if(!over)$('st').textContent=busy?(cur==='b'?'🤖 Agent is playing…':'Coins in motion…'):turn==='w'?'Your turn — pull back the striker':'Agent turn'}
 function shoot(side,sx,y,vx,vy){if($('cam').checked)$('c').classList.add('cine');beep(200,.08);if(!replaying)rec.push([side,sx,y,vx,vy]);const s=W[0];s.x=sx;s.y=y;s.vx=vx;s.vy=vy;s.out=0;pots=[];busy=true;cur=side;hint=null;ui();requestAnimationFrame(loop)}
 function loop(){const n0=pots.length;for(let i=0;i<2;i++)step(W,pots);pots.slice(n0).forEach(burst);draw();if(moving(W))return requestAnimationFrame(loop);end()}
@@ -48,7 +48,7 @@ function end(){busy=false;$('c').classList.remove('cine');camT=performance.now()
  const left=t=>W.filter(b=>b.t===t&&!b.out).length;
  if(!left('w')||!left('b')){over=true;saveStats();{const wn=scores.w>scores.b,dr=scores.w===scores.b,m=$('mode').value,msg=dr?'Draw!':m==='ai'?(wn?'🏆 You win!':'🤖 Agent wins'):(wn?'🏆 White wins!':'🏆 Black wins!'),won=m==='online'?(my==='w'?wn:!wn):m==='ai'?wn:true;$('st').textContent=msg;celebrate(!dr&&won,msg+` (${scores.w}–${scores.b})`+matchUpdate(wn,dr))}draw();return ui2()}
  turn=(r.own||r.q)&&!r.f?cur:o;place(turn);tl=+$('tlim').value;ui();draw();if(replaying)return void setTimeout(nextRp,600);if(turn==='b'&&$('mode').value==='ai')aiMove()}
-const ui2=()=>{$('sw').textContent=scores.w;$('sb').textContent=scores.b};
+const ui2=()=>{$('sw').textContent=scores.w;$('sb').textContent=scores.b;$('hs').textContent=scores.w+' – '+scores.b};
 function aiMove(){busy=true;cur='b';ui();setTimeout(()=>{const{best,n}=plan('b');log(`🤖 Simulated ${n} shots, best EV ${best.v.toFixed(1)}`);const q=(Math.random()-.5)*nzv(),cs=Math.cos(q),sn=Math.sin(q);shoot('b',best.sx,M+48,best.vx*cs-best.vy*sn,best.vx*sn+best.vy*cs)},60)}
 /* ---------- CNN-style conv map (2 Gaussian conv layers over coin occupancy grid) ---------- */
 function convMap(){const n=32,g=new Float32Array(n*n),cs=S/n;
