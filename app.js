@@ -110,11 +110,11 @@ $('ask').onclick=async()=>{const q=$('q').value.trim().slice(0,200),a=$('ans'),k
   const j=await r.json();if(j.choices){a.textContent=j.choices[0].message.content;return}}catch{}}
  a.textContent=ctx.join('\n\n')};
 showStats();
-fetch(API+'/api/health').then(r=>r.json()).then(j=>{$('api').textContent=j.ok?'online ✅':'offline'}).catch(()=>{$('api').textContent='offline (static mode)'});
+ping(0);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ---------- v3: adaptive agent, vision, telemetry, voice, keyboard, leaderboard ---------- */
-const nzv=()=>{const l=$('lvl').value;return l==='auto'?Math.max(0,.3-getStats().w*.04):NZ[l]};
+function nzv(){const l=$('lvl').value;return l==='auto'?Math.max(0,.3-getStats().w*.04):NZ[l]}
 function drawTele(){const c=$('sp'),g=c.getContext('2d'),w=c.width,h=c.height;g.clearRect(0,0,w,h);g.strokeStyle='#00ffc8';g.beginPath();const m=Math.max(5,...hist.map(Math.abs));
  hist.forEach((v,i)=>{const x=i/Math.max(1,hist.length-1)*w,y=h/2-v/m*(h/2-4);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();$('tt').textContent=`Strike rate — White ${rate('w')}% · Black ${rate('b')}%\nWin chance ~${winProb()}% (heuristic)\nShots ${tele.shots} · Pots ${tele.pots} · Agent sims ${tele.sims}`}
 $('eye').onclick=()=>{eye=!eye;draw()};
@@ -130,14 +130,14 @@ $('sub').onclick=async()=>{const name=$('nm').value.trim().slice(0,16);if(!name|
 drawTele();loadLB();
 
 /* ---------- v4: timer, themes, red/non-red, online rooms, aim assist, win animation ---------- */
-const rate=s=>sr[s][0]?Math.round(sr[s][1]/sr[s][0]*100):0;
+function rate(s){return sr[s][0]?Math.round(sr[s][1]/sr[s][0]*100):0}
 function rayHit(s,ux,uy){let best=null;const rr=(SR+R)**2;for(const c of W){if(c.out||c.t==='s')continue;const fx=c.x-s.x,fy=c.y-s.y,pr=fx*ux+fy*uy;if(pr<0)continue;const p2=fx*fx+fy*fy-pr*pr;if(p2>rr)continue;
  const t=pr-Math.sqrt(rr-p2);if(!best||t<best.t){const gx=s.x+ux*t,gy=s.y+uy*t,nx=c.x-gx,ny=c.y-gy,nl=Math.sqrt(nx*nx+ny*ny)||1;best={t,gx,gy,c,nx:nx/nl,ny:ny/nl}}}return best}
 function hud(){const lim=+$('tlim').value;$('tm').textContent=lim?`⏱ ${Math.max(0,tl)}s`:'⏱ ∞';$('gc').textContent=String(gt/60|0).padStart(2,'0')+':'+String(gt%60).padStart(2,'0');
  $('trn').textContent=busy?I[lang].m:(turn==='w'?I[lang].w:I[lang].b)+($('mode').value==='4p'?` · P${sr[turn][0]%2+1}`:'');$('bi').style.width=(lim?Math.max(0,tl)/lim*100:100)+'%'}
 function passTurn(){turn=turn==='w'?'b':'w';place(turn);tl=+$('tlim').value;log('⏱ Turn passed');ui();draw();hud();if(turn==='b'&&$('mode').value==='ai')aiMove()}
 setInterval(()=>{if(over||replaying)return;gt++;const ai=turn==='b'&&$('mode').value==='ai',lim=+$('tlim').value;
- if(!busy&&!ai&&lim){tl--;if(tl<=0&&(!online||turn===my)){if(online)api({a:'move',code:room,side:turn,pass:true}).catch(()=>{});passTurn()}}hud()},1000);
+ if(!busy&&!ai&&lim){tl--;if(tl<=0&&(!online||turn===my)){if(online)sendMove({a:'move',code:room,side:turn,pass:true});passTurn()}}hud()},1000);
 function confetti(){const c=$('cf'),g=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const ps=Array.from({length:150},()=>({x:Math.random()*c.width,y:-20-Math.random()*300,vx:Math.random()*4-2,vy:2+Math.random()*4,r:3+Math.random()*4,c:`hsl(${Math.random()*360},90%,60%)`}));let f=0;
  (function a(){g.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;g.fillStyle=p.c;g.fillRect(p.x,p.y,p.r,p.r*1.6)});if(++f<280)requestAnimationFrame(a);else g.clearRect(0,0,c.width,c.height)})()}
 function celebrate(win,msg){$('wt').textContent=msg;$('win').className=win?'up':'lose';$('win').hidden=false;if(win){confetti();[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18),i*140))}}
@@ -148,17 +148,16 @@ $('mode').onchange=()=>{if($('mode').value!=='online'){online=false;clearInterva
 $('theme').onchange=e=>{TH=THEMES[e.target.value];try{localStorage.setItem('cxt',e.target.value)}catch{}draw()};
 try{const t=localStorage.getItem('cxt');if(THEMES[t]){TH=THEMES[t];$('theme').value=t}}catch{}
 /* online rooms (turn-based, deterministic replay of shots via /api/room) */
-const api=o=>fetch(API+'/api/room',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(r=>r.json());
-function fire(sd,sx,vx,vy){const s=W[0];snaps.push(JSON.stringify({W:W.map(b=>({...b})),scores,turn,hist,sr,rl:rec.length}));shoot(sd,sx,s.y,vx,vy);if(online)api({a:'move',code:room,side:sd,sx,vx,vy}).catch(()=>{})}
-function startOnline(code,side){$('mode').value='online';reset();online=true;my=side;room=code;seq=0;$('rs').textContent=`Room ${code} — you are ${side==='w'?'White':'Black'}. Share the code!`;clearInterval(poll);poll=setInterval(pollRoom,1500)}
-async function pollRoom(){if(busy||over)return;try{const j=await (await fetch(API+`/api/room?code=${room}&from=${seq}`)).json(),m=(j.moves||[])[0];if(!m)return;
+function fire(sd,sx,vx,vy){const s=W[0];snaps.push(JSON.stringify({W:W.map(b=>({...b})),scores,turn,hist,sr,rl:rec.length}));shoot(sd,sx,s.y,vx,vy);if(online)sendMove({a:'move',code:room,side:sd,sx,vx,vy})}
+function startOnline(code,side){$('mode').value='online';reset();online=true;my=side;room=code;seq=0;$('rs').textContent=`Room ${code} — you are ${side==='w'?'White':'Black'}. Share the code!`;clearInterval(poll);poll=setInterval(pollRoom,2000)}
+async function pollRoom(){if(busy||over||turn===my)return;try{const j=await (await fetch(API+`/api/room?code=${room}&from=${seq}`)).json(),m=(j.moves||[])[0];if(!m)return;
  if(m.side===my){seq++;return}if(turn!==m.side)return;seq++;if(m.pass)passTurn();else shoot(m.side,m.sx,m.side==='w'?S-M-48:M+48,m.vx,m.vy)}catch{}}
 $('rcreate').onclick=async()=>{const j=await api({a:'create'}).catch(()=>({}));j.code?startOnline(j.code,'w'):$('rs').textContent='Online needs Upstash env vars'};
 $('rjoin').onclick=async()=>{const c=$('rc').value.trim().toUpperCase(),j=await api({a:'join',code:c}).catch(()=>({}));j.ok?startOnline(c,'b'):$('rs').textContent='Room not found'};
 reset();hud();
 
 /* ---------- v5: learned model, undo/replay, series, Elo, daily, languages, commentary ---------- */
-const say=a=>a[Math.random()*a.length|0];
+function say(a){return a[Math.random()*a.length|0]}
 function commentate(side,r){if(side==='w'){ms=(r.own||r.q)?0:ms+1;if(ms>=3){ms=0;log('💡 Coach: '+retrieve('aim ghost ball pocket power',1)[0])}}const w=side==='w'?'White':'Black';log(r.f?say([`${w} fouls! A coin returns.`,'Striker in the pocket 😬']):r.q?`👑 ${w} takes the queen!`:r.own>1?say([`Double pot by ${w}!`,'Clean sweep 🔥']):r.own?say([`${w} pots one.`,'Nice shot!']):say([`${w} misses.`,'Safe play.','No luck this time.']))}
 function matchUpdate(wn,dr){if(dr)return'';series[wn?'w':'b']++;const bo=+$('bo').value,need=Math.ceil(bo/2);let x='';
  if(bo>1&&(series.w>=need||series.b>=need)){x=` · MATCH ${series.w>=need?'WON':'LOST'} ${series.w}–${series.b}`;series={w:0,b:0}}$('ser').textContent=`Series ${series.w}–${series.b} (best of ${bo})`;return x}
@@ -172,7 +171,7 @@ function applyLang(){for(const k of['hint','heat','new','eye','mic','undo','repl
 $('lang').onchange=e=>{lang=e.target.value;try{localStorage.setItem('cxl',lang)}catch{}applyLang()};
 try{const l=localStorage.getItem('cxl');if(I[l]){lang=l;$('lang').value=l}}catch{}
 applyLang();
-fetch('model.json').then(r=>r.json()).then(m=>{ML.set(m);log('🧬 Learned shot model loaded')}).catch(()=>{});
+fetch('model.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(m=>{if(m&&m.W1&&m.b1&&m.W2){ML.set(m)};log('🧬 Learned shot model loaded')}).catch(()=>{});
 
 /* ---------- v7: pseudo-3D shading, particles, cinematic camera, win estimate ---------- */
 function coin3d(b){const r=b.r,base=b.t==='s'?'#3b82f6':b.t==='w'?TH.w:b.t==='b'?TH.b:'#d22';
@@ -185,3 +184,19 @@ function burst(b){for(let i=0;i<26;i++){const a=Math.random()*6.283,s=1+Math.ran
 function drawFx(){for(let i=PS.length-1;i>=0;i--){const p=PS[i];p.x+=p.vx;p.y+=p.vy;p.vx*=.96;p.vy*=.96;p.l-=.03;if(p.l<=0){PS.splice(i,1);continue}X.globalAlpha=p.l;X.fillStyle=p.c;X.beginPath();X.arc(p.x,p.y,2.4*p.l+.6,0,7);X.fill()}X.globalAlpha=1}
 function fxLoop(){if(!PS.length||busy)return;draw();requestAnimationFrame(fxLoop)}
 function winProb(){const left=t=>W.filter(b=>b.t===t&&!b.out).length,d=scores.w-scores.b+.6*(left('b')-left('w'));return Math.round(100/(1+Math.exp(-d/2.5)))}
+
+/* ---------- v8: hardened online play, invites, wake-up ping, clearer errors ---------- */
+function apiMsg(j){return j.status===503?'Online rooms need the Upstash keys on the server.':j.status===404?'Room not found or expired.':j.status===429?'Too many requests — wait a minute.':!j.status?'Server is waking up (free tier). Wait 30–60 s and try again.':'Server error '+j.status}
+async function api(o){let tm;const ctl=typeof AbortController!=='undefined'?new AbortController():null;try{if(ctl)tm=setTimeout(()=>ctl.abort(),65000);
+ const r=await fetch(API+'/api/room',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o),signal:ctl?ctl.signal:undefined});let j={};try{j=await r.json()}catch{}return{ok:r.ok,status:r.status,...j}}catch(e){return{ok:false,status:0}}finally{clearTimeout(tm)}}
+async function sendMove(o){for(let i=0;i<4;i++){const r=await api(o);if(r.ok)return;await new Promise(s=>setTimeout(s,1200*(i+1)))}log('⚠ Could not send your move — check connection')}
+$('rcreate').onclick=async()=>{$('rs').textContent='⏳ Creating room…';const j=await api({a:'create'});j.code?startOnline(j.code,'w'):$('rs').textContent='⚠ '+apiMsg(j)};
+$('rjoin').onclick=async()=>{const c=$('rc').value.trim().toUpperCase();if(!/^[A-Z2-9]{5}$/.test(c))return void($('rs').textContent='⚠ Enter the 5-character room code');$('rs').textContent='⏳ Joining…';const j=await api({a:'join',code:c});j.ok?startOnline(c,'b'):$('rs').textContent='⚠ '+apiMsg(j)};
+$('rinv').onclick=()=>{if(!room)return void($('rs').textContent='Create a room first');const link=`${location.origin}${location.pathname}?room=${room}`,txt=`Join my CARROM-X match! Room code ${room}`;
+ if(navigator.share)navigator.share({title:'CARROM-X',text:txt,url:link}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(txt+' '+link).then(()=>{$('rs').textContent='🔗 Invite link copied!'}).catch(()=>{$('rs').textContent=link})};
+$('sub').onclick=async()=>{const name=$('nm').value.trim().slice(0,16);if(!name||!over)return log('Finish a game and enter a name first');
+ try{const r=await fetch(API+'/api/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,score:scores.w})});
+  if(!r.ok)return void($('lbl').textContent='⚠ '+(r.status===400?'Name: letters/numbers only (max 16)':r.status===503?'Leaderboard not configured on server':'Could not submit'))}catch{return void($('lbl').textContent='⚠ Server is waking up — try again in a minute')}loadLB()};
+function ping(n){$('api').textContent=n?'waking server… ⏳':'checking…';fetch(API+'/api/health').then(r=>r.json()).then(j=>{$('api').textContent=j.ok?'online ✅':'offline'}).catch(()=>{if(n<12)setTimeout(()=>ping(n+1),5000);else $('api').textContent='offline (game still works locally)'})}
+ping(0);
+{const rm=new URLSearchParams(location.search).get('room');if(rm&&/^[A-Za-z2-9]{5}$/.test(rm)){$('rc').value=rm.toUpperCase();setTimeout(()=>$('rjoin').click(),800)}}

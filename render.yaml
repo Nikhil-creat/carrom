@@ -12,4 +12,4 @@ services:
       - key: UPSTASH_REDIS_REST_TOKEN
         sync: false
       - key: ALLOWED_ORIGIN
-        value: https://carrom-lilac.vercel.app
+        value: '*'
